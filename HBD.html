@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Happy Birthday Animation with 🎈 Balloons & Fireworks</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #000;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .birthday-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #ffcc00;
+      font-size: 2.5rem;
+      font-weight: bold;
+      text-align: center;
+      z-index: 2;
+      pointer-events: none;
+      user-select: none;
+      padding: 0 20px;
+      opacity: 0;
+      animation: fadeIn 2s ease forwards, textGlow 3s ease-in-out infinite, textScale 5s ease-in-out infinite;
+      text-shadow: 0 0 10px #ffcc00, 0 0 20px #ffaa00;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes textGlow {
+      0%, 100% {
+        text-shadow: 0 0 10px #ffcc00, 0 0 20px #ffaa00, 0 0 30px #ff8800;
+        color: #ffcc00;
+      }
+      50% {
+        text-shadow: 0 0 20px #ffff33, 0 0 40px #ff6600, 0 0 60px #ff3300;
+        color: #ffee55;
+      }
+    }
+
+    @keyframes textScale {
+      0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.1);
+      }
+    }
+
+    #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
+
+    #playMusicBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 10;
+      background-color: #ffcc00;
+      border: none;
+      padding: 12px 20px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 0 10px #ffcc00;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+
+    #playMusicBtn:hover {
+      background-color: #ffaa00;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="overlay"></canvas>
+  <div class="birthday-message">
+    🎉 Happy Birthday!<br>
+    Wishing you a day filled with joy and all your heart's desires. 🎂
+  </div>
+  <button id="playMusicBtn">Play Music 🎵</button>
+
+  <audio id="bgMusic" loop preload="auto" crossorigin="anonymous">
+    <source src="https://cdn.freesound.org/previews/369/369147_5121236-lq.mp3" type="audio/mp3" />
+    Your browser does not support the audio element.
+  </audio>
+
+  <script>
+    const overlay = document.getElementById('overlay');
+    const ctx = overlay.getContext('2d');
+    overlay.width = window.innerWidth;
+    overlay.height = window.innerHeight;
+
+    // Balloon class
+    class Balloon {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = Math.random() * overlay.width;
+        this.y = overlay.height + Math.random() * 200;
+        this.size = 40 + Math.random() * 30;
+        this.speed = 0.5 + Math.random();
+        this.colorHue = Math.floor(Math.random() * 360);
+        this.swing = Math.random() * 0.05 + 0.01;
+        this.swingPhase = Math.random() * Math.PI * 2;
+      }
+      update() {
+        this.y -= this.speed;
+        this.x += Math.sin(this.swingPhase) * 0.5;
+        this.swingPhase += this.swing;
+        if (this.y + this.size < 0) this.reset();
+      }
+      draw(ctx) {
+        ctx.font = `${this.size}px serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = `hsl(${this.colorHue}, 80%, 60%)`;
+        ctx.shadowBlur = 15;
+        ctx.fillStyle = `hsl(${this.colorHue}, 70%, 60%)`;
+        ctx.fillText('🎈', this.x, this.y);
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    // Heart class
+    class Heart {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = Math.random() * overlay.width;
+        this.y = overlay.height + Math.random() * 300;
+        this.size = 12 + Math.random() * 10;
+        this.speed = 0.7 + Math.random();
+        this.alpha = 1;
+        this.colorHue = Math.floor(Math.random() * 360);
+      }
+      update() {
+        this.y -= this.speed;
+        this.alpha -= 0.003;
+        if (this.alpha <= 0 || this.y + this.size < 0) this.reset();
+      }
+      draw(ctx) {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.fillStyle = `hsl(${this.colorHue}, 70%, 70%)`;
+        const x = this.x, y = this.y, size = this.size;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.bezierCurveTo(x, y - size / 2, x - size, y - size / 2, x - size, y);
+        ctx.bezierCurveTo(x - size, y + size, x, y + size * 1.5, x, y + size * 2);
+        ctx.bezierCurveTo(x, y + size * 1.5, x + size, y + size, x + size, y);
+        ctx.bezierCurveTo(x + size, y - size / 2, x, y - size / 2, x, y);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // Firework particle
+    class FireworkParticle {
+      constructor(x, y, colorHue) {
+        this.x = x;
+        this.y = y;
+        this.size = Math.random() * 2 + 1;
+        this.speedX = (Math.random() - 0.5) * 6;
+        this.speedY = (Math.random() - 0.5) * 6;
+        this.alpha = 1;
+        this.colorHue = colorHue;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.alpha -= 0.02;
+      }
+      draw(ctx) {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.fillStyle = `hsl(${this.colorHue}, 100%, 60%)`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    const balloons = Array.from({length: 15}, () => new Balloon());
+    const hearts = Array.from({length: 20}, () => new Heart());
+    const fireworks = [];
+
+    function createFirework() {
+      const x = Math.random() * overlay.width;
+      const y = Math.random() * overlay.height / 2;
+      const hue = Math.floor(Math.random() * 360);
+      for (let i = 0; i < 30; i++) {
+        fireworks.push(new FireworkParticle(x, y, hue));
+      }
+    }
+
+    setInterval(createFirework, 1500);
+
+    function animate() {
+      ctx.clearRect(0, 0, overlay.width, overlay.height);
+      balloons.forEach(b => { b.update(); b.draw(ctx); });
+      hearts.forEach(h => { h.update(); h.draw(ctx); });
+
+      for (let i = fireworks.length - 1; i >= 0; i--) {
+        fireworks[i].update();
+        fireworks[i].draw(ctx);
+        if (fireworks[i].alpha <= 0) fireworks.splice(i, 1);
+      }
+
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      overlay.width = window.innerWidth;
+      overlay.height = window.innerHeight;
+    });
+
+    const bgMusic = document.getElementById('bgMusic');
+    const playMusicBtn = document.getElementById('playMusicBtn');
+
+    playMusicBtn.addEventListener('click', async () => {
+      try {
+        await bgMusic.play();
+        playMusicBtn.style.display = 'none';
+      } catch (err) {
+        alert('Playback failed. Please click again or allow autoplay.');
+      }
+    });
+  </script>
+</body>
+</html>
