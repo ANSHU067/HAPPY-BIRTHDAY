@@ -23,3 +23,10 @@ def test_health_reports_dependencies(monkeypatch) -> None:
     assert response.status_code == 200
     assert response.json() == {"status": "ok", "database": True, "redis": True}
     assert response.headers["X-Request-ID"]
+
+
+def test_info_uses_settings_dependency() -> None:
+    response = client.get("/api/v1/info")
+
+    assert response.status_code == 200
+    assert response.json()["name"] == "DOCPRO V2 API"
