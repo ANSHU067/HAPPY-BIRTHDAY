@@ -15,10 +15,10 @@ def check_redis_connection() -> bool:
         return False
 
 
-def get_health_status() -> dict[str, bool | str]:
+async def get_health_status() -> dict[str, bool | str]:
     """Collect the API dependency statuses."""
 
-    database = check_database_connection()
+    database = await check_database_connection()
     redis = check_redis_connection()
     return {
         "status": "ok" if database and redis else "degraded",

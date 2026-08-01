@@ -2,17 +2,15 @@
 
 from logging.config import fileConfig
 
-from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from app.config.settings import get_settings
+import app.models.entities  # noqa: F401 - registers every model with Base.metadata
+from alembic import context
 from app.models.base import Base
 
-
 config = context.config
-if config.config_file_name:
+if config.config_file_name and config.file_config.has_section("formatters"):
     fileConfig(config.config_file_name)
-config.set_main_option("sqlalchemy.url", get_settings().database_url)
 target_metadata = Base.metadata
 
 

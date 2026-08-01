@@ -1,0 +1,4 @@
+# Embedding layer dependencies
+sentence-transformers>=3.0,<4.0
+FlagEmbedding>=1.2,<2.0
+numpy>=1.24,<2.0

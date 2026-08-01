@@ -4,7 +4,6 @@ from fastapi.testclient import TestClient
 
 from main import app
 
-
 client = TestClient(app)
 
 
@@ -15,7 +14,10 @@ def test_docs_are_available() -> None:
 
 
 def test_health_reports_dependencies(monkeypatch) -> None:
-    monkeypatch.setattr("app.services.health.check_database_connection", lambda: True)
+    async def database_is_up() -> bool:
+        return True
+
+    monkeypatch.setattr("app.services.health.check_database_connection", database_is_up)
     monkeypatch.setattr("app.services.health.check_redis_connection", lambda: True)
 
     response = client.get("/api/v1/health")
