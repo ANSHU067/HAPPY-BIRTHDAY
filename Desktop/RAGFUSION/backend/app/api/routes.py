@@ -3,7 +3,9 @@
 from fastapi import APIRouter
 
 from app.api.auth import router as auth_router
+from app.api.chat import router as chat_router
 from app.api.documents import router as documents_router
+from app.api.history import router as history_router
 from app.api.website import router as website_router
 from app.dependencies.settings import SettingsDependency
 from app.schemas.health import HealthResponse
@@ -11,7 +13,9 @@ from app.services.health import get_health_status
 
 router = APIRouter(tags=["system"])
 router.include_router(auth_router)
+router.include_router(chat_router)
 router.include_router(documents_router)
+router.include_router(history_router)
 router.include_router(website_router)
 
 

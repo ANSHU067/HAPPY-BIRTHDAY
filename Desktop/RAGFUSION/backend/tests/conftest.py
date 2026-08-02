@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
                                     create_async_engine)
 
+
 # ---------------------------------------------------------------------
 # Add the backend directory to the Python path
 # ---------------------------------------------------------------------
@@ -24,7 +25,7 @@ if str(BACKEND_DIR) not in sys.path:
 
 # IMPORTANT
 import app.services.ingestion_service as ingestion_service
-from app.db import session as db_session
+from app.db import session as db_module
 from app.db.session import get_db_session
 from app.models.base import Base
 from app.models.entities import User, UserRole
@@ -59,14 +60,17 @@ async def test_db(tmp_path):
     # -----------------------------------------------------------------
     # Remove cached PostgreSQL connections
     # -----------------------------------------------------------------
+# -----------------------------------------------------------------
+        # Remove cached PostgreSQL connections
+        # -----------------------------------------------------------------
 
     try:
-        db_session.get_async_engine.cache_clear()
-        db_session.get_session_factory.cache_clear()
+        db_module.get_async_engine.cache_clear()
+        db_module.get_session_factory.cache_clear()
     except Exception:
         pass
 
-    original_get_session_factory = db_session.get_session_factory
+    original_get_session_factory = db_module.get_session_factory
     original_ingestion_session_factory = ingestion_service.get_session_factory
 
     patched_factory = lambda database_url=None: session_factory
@@ -109,7 +113,60 @@ def client(test_db):
 
 
 # ---------------------------------------------------------------------
-# Mock user fixture
+# Database session fixture
+# ---------------------------------------------------------------------
+
+
+@pytest.fixture
+async def db_session(test_db):
+    """Create a database session for testing."""
+
+    async with test_db() as session:
+        yield session
+
+
+# ---------------------------------------------------------------------
+# Test user fixture
+# ---------------------------------------------------------------------
+
+
+@pytest.fixture
+async def test_user(db_session):
+    """Create a test user in the database."""
+    from app.services.auth import hash_password
+
+    user = User(
+        id=uuid4(),
+        email="test@example.com",
+        display_name="Test User",
+        password_hash=hash_password("testpassword"),
+        role=UserRole.user,
+        is_active=True,
+    )
+
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
+
+    return user
+
+
+# ---------------------------------------------------------------------
+# Auth headers fixture
+# ---------------------------------------------------------------------
+
+
+@pytest.fixture
+async def auth_headers(test_user):
+    """Create authentication headers for testing."""
+    from app.services.auth import create_access_token
+        
+    # Add the 'role' argument here!
+    token = create_access_token(test_user.id, role=test_user.role)
+    return {"Authorization": f"Bearer {token}"}
+
+# ---------------------------------------------------------------------
+# Mock user fixture (for unit tests without DB)
 # ---------------------------------------------------------------------
 
 

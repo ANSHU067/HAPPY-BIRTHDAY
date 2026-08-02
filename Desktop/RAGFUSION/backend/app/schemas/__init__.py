@@ -2,6 +2,10 @@
 
 from app.schemas.auth import (LoginRequest, LogoutResponse, RefreshRequest,
                               SignupRequest, TokenResponse, UserResponse)
+from app.schemas.chat import (ChatHistoryResponse, ChatRequest, ChatResponse,
+                              ChatSessionCreate, ChatSessionListResponse,
+                              ChatSessionResponse, Citation, MessageCreate,
+                              MessageResponse, StreamChunk)
 from app.schemas.document import (ChunkingConfig, DocumentChunk,
                                   DocumentDeleteResponse, DocumentFormat,
                                   DocumentListResponse, DocumentMetadata,
@@ -10,6 +14,14 @@ from app.schemas.document import (ChunkingConfig, DocumentChunk,
                                   DocumentUploadResponse, EmbeddingConfig,
                                   ProcessingConfig)
 from app.schemas.health import HealthResponse
+from app.schemas.history import (HistoryDeleteResponse, HistoryFilterParams,
+                                 HistoryFilterStatus, HistoryPaginationParams,
+                                 HistoryRenameRequest, HistoryRenameResponse,
+                                 HistoryRestoreResponse, HistorySearchRequest,
+                                 HistorySearchResponse,
+                                 HistorySessionListResponse,
+                                 HistorySessionResponse, HistorySortField,
+                                 HistorySortOrder, HistorySortParams)
 
 __all__ = [
     "HealthResponse",
@@ -19,6 +31,17 @@ __all__ = [
     "SignupRequest",
     "TokenResponse",
     "UserResponse",
+    # Chat schemas
+    "ChatRequest",
+    "ChatResponse",
+    "ChatSessionCreate",
+    "ChatSessionResponse",
+    "ChatSessionListResponse",
+    "ChatHistoryResponse",
+    "MessageCreate",
+    "MessageResponse",
+    "Citation",
+    "StreamChunk",
     # Document schemas
     "DocumentFormat",
     "DocumentStatus",
@@ -33,4 +56,19 @@ __all__ = [
     "ChunkingConfig",
     "EmbeddingConfig",
     "ProcessingConfig",
+    # History schemas
+    "HistorySessionResponse",
+    "HistorySessionListResponse",
+    "HistorySearchRequest",
+    "HistorySearchResponse",
+    "HistoryRenameRequest",
+    "HistoryRenameResponse",
+    "HistoryDeleteResponse",
+    "HistoryRestoreResponse",
+    "HistoryPaginationParams",
+    "HistorySortParams",
+    "HistoryFilterParams",
+    "HistorySortField",
+    "HistorySortOrder",
+    "HistoryFilterStatus",
 ]
